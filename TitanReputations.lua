@@ -36,6 +36,10 @@ local function GetValueAndMaximum(standingID, barValue)
 	end
 end
 
+local function GetStanding(standingId)
+	return (SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"]
+end
+
 local function GetButtonText(self, id)
 	local name, standingID, bottomValue, topValue, barValue = GetWatchedFactionInfo()
 
@@ -66,33 +70,57 @@ end
 
 local function GetTooltipText(self, id)
 	local factionIndex = 1
-	local lastFactionName
 
 	local text = ""
 
-	repeat
-		local name, description, standingId, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(factionIndex)
-		if name == lastFactionName then break end
-		lastFactionName = name
+	local notHideNeutral = not TitanGetVar(id, "HideNeutral")
+	local showHeaders = not TitanGetVar(id, "ShowHeaders")
 
-		if name and (not isHeader or hasRep) and not IsFactionInactive(factionIndex) then
-			if isWatched or standingId > 4 or not TitanGetVar(id, "HideNeutral") then
+	while (factionIndex < 200) do
+		local name, _, standingId, bottomValue, topValue, earnedValue, atWarWith, _, isHeader, _, hasRep, isWatched = GetFactionInfo(factionIndex)
+		if not name then break end
+
+		if not IsFactionInactive(factionIndex) then
+			local lText = ""
+
+			local headerText = (showHeaders and Color.WHITE .. name .. "|r\n") or ""
+
+			if hasRep then
 				local value, max, color = GetValueAndMaximum(standingId, earnedValue)
+				local nameColor = (atWarWith and Color.RED) or Color.WHITE
+				local standing = GetStanding(standingId)
 
-				local nameColor = (atWarWith and Color.RED) or ""
+				headerText = ""
+				lText = lText .. nameColor .. name .. "\t" .. color .. value .. "/" .. max .. " (" .. standing .. ")|r\n"
+			end
 
-				local standing = (SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"]
+			while (factionIndex < 200) do
+				name, _, standingId, bottomValue, topValue, earnedValue, atWarWith, _, isHeader, _, hasRep, isWatched = GetFactionInfo(factionIndex + 1)
 
-				if isWatched then
-					text = nameColor .. name .. "|r\t" .. color .. value .. "/" .. max .. " (" .. standing .. ")|r\n\n" .. text
-				else
-					text = text .. nameColor .. name .. "\t" .. color .. value .. "/" .. max .. " (" .. standing .. ")|r\n"
+				if not name or isHeader then break end
+
+				if (isWatched or standingId > 4 or notHideNeutral) and not IsFactionInactive(factionIndex + 1) then
+					local value, max, color = GetValueAndMaximum(standingId, earnedValue)
+					local nameColor = (atWarWith and Color.RED) or ""
+					local standing = GetStanding(standingId)
+
+					if isWatched then
+						text = nameColor .. name .. "\t" .. color .. value .. "/" .. max .. " (" .. standing .. ")|r\n\n" .. text
+					else
+						lText = lText .. "-" .. nameColor .. name .. "\t" .. color .. value .. "/" .. max .. " (" .. standing .. ")|r\n"
+					end
 				end
+
+				factionIndex = factionIndex + 1
+			end
+
+			if lText ~= "" then
+				text = text .. headerText .. lText
 			end
 		end
 
 		factionIndex = factionIndex + 1
-	until factionIndex > 200
+	end
 
 	return text
 end
@@ -102,8 +130,6 @@ local eventsTable = {
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 
 		TitanPanelButton_UpdateButton(self.registry.id)
-
-		print()
 	end,
 	UPDATE_FACTION = function(self)
 		TitanPanelButton_UpdateButton(self.registry.id)
@@ -120,6 +146,7 @@ local menus = {
 	{ type = "toggle", text = L["HideNeutral"], var = "HideNeutral", def = false },
 	{ type = "toggle", text = L["ShowValue"], var = "ShowValue", def = true },
 	{ type = "toggle", text = L["ShowPercent"], var = "ShowPercent", def = true },
+	{ type = "toggle", text = L["ShowHeaders"], var = "ShowHeaders", def = true },
 	{ type = "rightSideToggle" }
 }
 
