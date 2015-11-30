@@ -52,8 +52,13 @@ local function GetButtonText(self, id)
 	local text = "" .. color
 
 	local showvalue = TitanGetVar(id, "ShowValue")
+	local hideMax = TitanGetVar(id, "HideMax")
 	if showvalue then
-		text = text .. value .. "/" .. max
+		text = text .. value
+
+		if not hideMax then
+			text = text .. "/" .. max
+		end
 	end
 	if TitanGetVar(id, "ShowPercent") then
 		local percent = math.floor((barValue - bottomValue) * 100 / (topValue - bottomValue))
@@ -73,8 +78,8 @@ local function GetTooltipText(self, id)
 
 	local text = ""
 
-	local notHideNeutral = not TitanGetVar(id, "HideNeutral")
-	local showHeaders = not TitanGetVar(id, "ShowHeaders")
+	local hideNeutral = TitanGetVar(id, "HideNeutral")
+	local showHeaders = TitanGetVar(id, "ShowHeaders")
 
 	while (factionIndex < 200) do
 		local name, _, standingId, bottomValue, topValue, earnedValue, atWarWith, _, isHeader, _, hasRep, isWatched = GetFactionInfo(factionIndex)
@@ -99,7 +104,20 @@ local function GetTooltipText(self, id)
 
 				if not name or isHeader then break end
 
-				if (isWatched or standingId > 4 or notHideNeutral) and not IsFactionInactive(factionIndex + 1) then
+				local hideExalted = TitanGetVar(id, "HideExalted")
+				local show = true
+
+				if not isWatched then
+					if IsFactionInactive(factionIndex + 1) then
+						show = false
+					elseif hideNeutral and standingId <= 4 then
+						show = false
+					elseif hideExalted and standingId == 8 then
+						show = false
+					end
+				end
+
+				if show then
 					local value, max, color = GetValueAndMaximum(standingId, earnedValue)
 					local nameColor = (atWarWith and Color.RED) or ""
 					local standing = GetStanding(standingId)
@@ -143,10 +161,13 @@ local function OnClick(self, button)
 end
 
 local menus = {
-	{ type = "toggle", text = L["HideNeutral"], var = "HideNeutral", def = false },
-	{ type = "toggle", text = L["ShowValue"], var = "ShowValue", def = true },
-	{ type = "toggle", text = L["ShowPercent"], var = "ShowPercent", def = true },
-	{ type = "toggle", text = L["ShowHeaders"], var = "ShowHeaders", def = true },
+	{ type = "space" },
+	{ type = "toggle", text = L["HideNeutral"], var = "HideNeutral", def = false, keepShown = true },
+	{ type = "toggle", text = L["ShowValue"], var = "ShowValue", def = true, keepShown = true },
+	{ type = "toggle", text = L["ShowPercent"], var = "ShowPercent", def = true, keepShown = true },
+	{ type = "toggle", text = L["ShowHeaders"], var = "ShowHeaders", def = true, keepShown = true },
+	{ type = "toggle", text = L["HideMax"], var = "HideMax", def = false, keepShown = true },
+	{ type = "space" },
 	{ type = "rightSideToggle" }
 }
 
