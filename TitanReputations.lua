@@ -88,75 +88,97 @@ local function GetButtonText(self, id)
 	return name .. ":", text
 end
 
-local function GetTooltipText(self, id)
-	local factionIndex = 1
+local function IsNeutral(factionId, standingId)
+	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionId)
 
-	local text = ""
+	if friendID then
+		return false
+	end
+
+	return standingId <= 4
+end
+
+local function IsMaxed(factionId, standingId)
+	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionId)
+
+	if friendID then
+		return not nextFriendThreshold
+	end
+
+	return standingId == 8
+end
+
+local function GetTooltipText(self, id)
+		local text = ""
 
 	local hideNeutral = TitanGetVar(id, "HideNeutral")
 	local showHeaders = TitanGetVar(id, "ShowHeaders")
 
 	local numFactions = GetNumFactions()
 
-	while (factionIndex < numFactions) do
+	local topText = ""
+
+	local headerText
+	local childText = ""
+
+	for factionIndex = 1, numFactions do
 		local name, _, standingId, bottomValue, topValue, earnedValue, atWarWith, _, isHeader, _, hasRep, isWatched, _, factionId = GetFactionInfo(factionIndex)
 
 		if name then
-			if not IsFactionInactive(factionIndex) then
-				local lText = ""
-
-				local headerText = (showHeaders and Color.WHITE .. name .. "|r\n") or ""
-
-				if hasRep then
-					local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
-					local nameColor = (atWarWith and Color.RED) or Color.WHITE
-
-					headerText = ""
-					lText = lText .. nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n"
+			if isHeader then
+				-- if the previous header has child
+				if (headerText and childText ~= "") then
+					text = text .. headerText .. childText
+					headerText = nil
+					childText = ""
 				end
 
-				while (factionIndex < numFactions) do
-					name, _, standingId, bottomValue, topValue, earnedValue, atWarWith, _, isHeader, _, hasRep, isWatched, _, factionId = GetFactionInfo(factionIndex + 1)
-
-					if not name or isHeader then break end
-
-					local hideExalted = TitanGetVar(id, "HideExalted")
-					local show = true
-
-					if not isWatched then
-						if IsFactionInactive(factionIndex + 1) then
-							show = false
-						elseif hideNeutral and standingId <= 4 then
-							show = false
-						elseif hideExalted and standingId == 8 then
-							show = false
-						end
-					end
-
-					if show then
+				if showHeaders then
+					if hasRep then
 						local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
-						local nameColor = (atWarWith and Color.RED) or ""
 
-						if isWatched then
-							text = nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n\n" .. text
-						else
-							lText = lText .. "-" .. nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n"
-						end
+						headerText = Color.WHITE .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n"
+					else
+						headerText = Color.WHITE .. name .. "|r\n"
 					end
+				end
+			else
+				local hideExalted = TitanGetVar(id, "HideExalted")
+				local show = true
 
-					factionIndex = factionIndex + 1
+				if not isWatched then
+					if IsFactionInactive(factionIndex) then
+						show = false
+					elseif hideNeutral and IsNeutral(factionId, standingId) then
+						show = false
+					elseif hideExalted and IsMaxed(factionId, standingId) then
+						show = false
+					end
 				end
 
-				if lText ~= "" then
-					text = text .. headerText .. lText
+				if show then
+					local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
+					local nameColor = (atWarWith and Color.RED) or ""
+
+					if isWatched then
+						topText = nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n\n"
+					else
+						childText = childText .. "-" .. nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n"
+					end
 				end
 			end
 		end
-
-		factionIndex = factionIndex + 1
 	end
 
-	return text
+	if (childText ~= "") then
+		if (headerText) then
+			text = text .. headerText
+		end
+
+		text = text .. childText
+	end
+
+	return topText .. text
 end
 
 local eventsTable = {
