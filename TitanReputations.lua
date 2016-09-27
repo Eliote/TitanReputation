@@ -16,66 +16,44 @@ Color.ORANGE = "|cFFE77324"
 
 local SEX = UnitSex("player")
 
-local function isFollower(id)
-	return ((id >= 1736 and id <= 1741) or id == 1733 or id == 1975) and id
-end
 
--- @return current, maximun, color
-local function GetValueAndMaximum(standingID, barValue, follower)
-	if (follower) then
-		-- Conjurer Margoss
-		if (follower == 1975) then
-			if (standingID == 1) then
-				return barValue, 8400, "|cFFEE6622"
-			elseif (standingID == 2) then
-				return barValue - 8400, 8400, "|cFFFFFF00"
-			elseif (standingID == 3) then
-				return barValue - 16800, 8400, "|cFF00FF00"
-			elseif (standingID == 4) then
-				return barValue - 25200, 8400, "|cFF00FF88"
-			elseif (standingID == 5) then
-				return barValue - 33600, 8400, "|cFF00FFCC"
-			else
-				return barValue - 41999, 8400, "|cFF00FFFF"
-			end
-		end
+-- @return current, maximun, color, standingText
+local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, factionId)
+	local current = barValue - bottomValue
+	local maximun = topValue - bottomValue
+	local color = "|cFF00FF00"
+	local stantingText = " (" .. ((SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"]) .. ")"
 
-		-- Draenor
-		if (standingID == 1) then
-			return barValue, 10000, "|cFFFFFF00"
+	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionId)
+	if (friendID) then
+		stantingText = " (" .. friendTextLevel .. ")"
+
+		if (nextFriendThreshold) then
+			maximun, current = nextFriendThreshold - friendThreshold, friendRep - friendThreshold
 		else
-			return barValue - 10000, 10000, "|cFF00FF88"
+			maximun, current = 1, 1
+		end
+	else
+		if standingId == 1 then
+			color = "|cFFCC2222"
+		elseif standingId == 2 then
+			color = "|cFFFF0000"
+		elseif standingId == 3 then
+			color = "|cFFEE6622"
+		elseif standingId == 4 then
+			color = "|cFFFFFF00"
+		elseif standingId == 5 then
+			color = "|cFF00FF00"
+		elseif standingId == 6 then
+			color = "|cFF00FF88"
+		elseif standingId == 7 then
+			color = "|cFF00FFCC"
+		elseif standingId == 8 then
+			color = "|cFF00FFFF"
 		end
 	end
 
-	if standingID == 1 then
-		return barValue + 42000, 36000, "|cFFCC2222"
-	elseif standingID == 2 then
-		return barValue + 6000, 3000, "|cFFFF0000"
-	elseif standingID == 3 then
-		return barValue + 3000, 3000, "|cFFEE6622"
-	elseif standingID == 4 then
-		return barValue, 3000, "|cFFFFFF00"
-	elseif standingID == 5 then
-		return barValue - 3000, 6000, "|cFF00FF00"
-	elseif standingID == 6 then
-		return barValue - 9000, 12000, "|cFF00FF88"
-	elseif standingID == 7 then
-		return barValue - 21000, 21000, "|cFF00FFCC"
-	elseif standingID == 8 then
-		return barValue - 42000, 1000, "|cFF00FFFF"
-	end
-
-	-- just in case
-	return barValue, barValue, ""
-end
-
-local function GetStanding(standingId, follower)
-	if follower then
-		return ""
-	end
-
-	return " (" .. ((SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"]) .. ")"
+	return current, maximun, color, stantingText
 end
 
 local function GetButtonText(self, id)
@@ -84,7 +62,7 @@ local function GetButtonText(self, id)
 	if not name then
 		return "", ""
 	end
-	local value, max, color = GetValueAndMaximum(standingID, barValue, isFollower(factionId))
+	local value, max, color = GetValueAndMaximum(standingID, barValue, bottomValue, topValue, factionId)
 
 	local text = "" .. color
 
@@ -130,9 +108,8 @@ local function GetTooltipText(self, id)
 				local headerText = (showHeaders and Color.WHITE .. name .. "|r\n") or ""
 
 				if hasRep then
-					local value, max, color = GetValueAndMaximum(standingId, earnedValue, isFollower(factionId))
+					local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
 					local nameColor = (atWarWith and Color.RED) or Color.WHITE
-					local standing = GetStanding(standingId, isFollower(factionId))
 
 					headerText = ""
 					lText = lText .. nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n"
@@ -157,9 +134,8 @@ local function GetTooltipText(self, id)
 					end
 
 					if show then
-						local value, max, color = GetValueAndMaximum(standingId, earnedValue, isFollower(factionId))
+						local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
 						local nameColor = (atWarWith and Color.RED) or ""
-						local standing = GetStanding(standingId, isFollower(factionId))
 
 						if isWatched then
 							text = nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n\n" .. text
