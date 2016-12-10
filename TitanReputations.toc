@@ -5,6 +5,6 @@
 ## Version: @project-version@
 ## Dependencies: Titan
 Locales.lua
-Elib-2.3.lua
+Elib-2.4.lua
 TitanReputations.lua
 
