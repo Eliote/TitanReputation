@@ -241,18 +241,13 @@ L.Elib({
 	name = L["Reputation"],
 	tooltip = L["Reputation"],
 	icon = "Interface\\Icons\\INV_MISC_NOTE_02",
-	category = "TEST_CATEGORY",
+	category = "Information",
 	version = VERSION,
 	getButtonText = GetButtonText,
 	getTooltipText = GetTooltipText,
 	eventsTable = eventsTable,
 	menus = menus,
-	onClick = OnClick,
-	onLoad = function()
-		local categories = LibStub("AceLocale-3.0"):GetLocale(TITAN_ID, true)["TITAN_PANEL_MENU_CATEGORIES"]
-		table.insert(categories, "TESTE 1 2 3")
-		table.insert(TITAN_PANEL_BUTTONS_PLUGIN_CATEGORY, "TEST_CATEGORY")
-	end
+	onClick = OnClick
 })
 
 
