@@ -6,6 +6,7 @@
 local ADDON_NAME, L = ...;
 local VERSION = GetAddOnMetadata(ADDON_NAME, "Version")
 
+local Elib = LibStub("Elib-3.0")
 
 local Color = {}
 Color.WHITE = "|cFFFFFFFF"
@@ -236,7 +237,7 @@ local menus = {
 	{ type = "rightSideToggle" }
 }
 
-L.Elib({
+Elib.Register({
 	id = "TITAN_REPUTATION_XP",
 	name = L["Reputation"],
 	tooltip = L["Reputation"],

@@ -3,8 +3,11 @@
 	Author: Eliote
 --]]
 
-local ADDON_NAME, L = ...;
-local ACE = LibStub("AceLocale-3.0"):GetLocale("Titan", true)
+local MAJOR, MINOR = "Elib-3.0", 1
+local Elib = LibStub:NewLibrary(MAJOR, MINOR)
+if not Elib then return end
+
+local ACE = LibStub("AceLocale-3.0"):GetLocale("TitanClassic", true)
 
 local function defaultMenu(self, id, menus)
 	TitanPanelRightClickMenu_AddTitle(TitanPlugins[id].menuText)
@@ -57,8 +60,7 @@ local function setDefaultSavedVariables(sv, menus)
 	end
 end
 
--- Using the private table to register the lib
-function L.Elib(easyObject)
+function Elib.Register(easyObject)
 	local elap = 0
 
 	-- Main button frame and addon base
@@ -78,11 +80,7 @@ function L.Elib(easyObject)
 		end
 	end
 
-	function frame:ADDON_LOADED(a1)
-		if a1 ~= ADDON_NAME then
-			return
-		end
-
+	function frame:ADDON_LOADED()
 		self:UnregisterEvent("ADDON_LOADED")
 		self.ADDON_LOADED = nil
 
