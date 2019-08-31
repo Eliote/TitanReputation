@@ -1,9 +1,9 @@
-## Interface: 80200
+## Interface: 11302
 ## Title: Titan Panel [|cffeda55fReputation|r]
 ## Notes: Titan Panel plugin that shows your Reputations.
 ## Author: Eliote
 ## Version: @project-version@
-## Dependencies: Titan
+## Dependencies: TitanClassic
 Locales.lua
 Elib-3.0.lua
 TitanReputations.lua
