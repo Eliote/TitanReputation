@@ -27,43 +27,22 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 	local color = "|cFF00FF00"
 	local standingText = " (" .. ((SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"] or "?") .. ")"
 
-	if (C_Reputation.IsFactionParagon(factionId)) then
+	if standingId == 1 then
+		color = "|cFFCC2222"
+	elseif standingId == 2 then
+		color = "|cFFFF0000"
+	elseif standingId == 3 then
+		color = "|cFFEE6622"
+	elseif standingId == 4 then
+		color = "|cFFFFFF00"
+	elseif standingId == 5 then
+		color = "|cFF00FF00"
+	elseif standingId == 6 then
+		color = "|cFF00FF88"
+	elseif standingId == 7 then
+		color = "|cFF00FFCC"
+	elseif standingId == 8 then
 		color = "|cFF00FFFF"
-
-		local currentValue, threshold, rewardQuestID, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionId);
-
-		if hasRewardPending then standingText = standingText .. "*" end
-
-		return mod(currentValue, threshold), threshold, color, standingText, hasRewardPending
-	end
-
-	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionId)
-	if (friendID) then
-		standingText = " (" .. friendTextLevel .. ")"
-
-		if (nextFriendThreshold) then
-			maximun, current = nextFriendThreshold - friendThreshold, friendRep - friendThreshold
-		else
-			maximun, current = 1, 1
-		end
-	else
-		if standingId == 1 then
-			color = "|cFFCC2222"
-		elseif standingId == 2 then
-			color = "|cFFFF0000"
-		elseif standingId == 3 then
-			color = "|cFFEE6622"
-		elseif standingId == 4 then
-			color = "|cFFFFFF00"
-		elseif standingId == 5 then
-			color = "|cFF00FF00"
-		elseif standingId == 6 then
-			color = "|cFF00FF88"
-		elseif standingId == 7 then
-			color = "|cFF00FFCC"
-		elseif standingId == 8 then
-			color = "|cFF00FFFF"
-		end
 	end
 
 	return current, maximun, color, standingText
@@ -109,22 +88,10 @@ local function GetButtonText(self, id)
 end
 
 local function IsNeutral(factionId, standingId)
-	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionId)
-
-	if friendID then
-		return false
-	end
-
 	return standingId <= 4
 end
 
 local function IsMaxed(factionId, standingId)
-	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionId)
-
-	if friendID then
-		return not nextFriendThreshold
-	end
-
 	return standingId == 8
 end
 
@@ -133,7 +100,6 @@ local function GetTooltipText(self, id)
 
 	local hideNeutral = TitanGetVar(id, "HideNeutral")
 	local showHeaders = TitanGetVar(id, "ShowHeaders")
-	local alwaysShowParagon = TitanGetVar(id, "AlwaysShowParagon")
 
 	local numFactions = GetNumFactions()
 
@@ -182,10 +148,6 @@ local function GetTooltipText(self, id)
 					show = false
 				end
 
-				if (alwaysShowParagon and C_Reputation.IsFactionParagon(factionId)) then
-					show = true
-				end
-
 				if show then
 					local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
 					local nameColor = (atWarWith and Color.RED) or ""
@@ -232,7 +194,6 @@ local menus = {
 	{ type = "toggle", text = L["ShowHeaders"], var = "ShowHeaders", def = true, keepShown = true },
 	{ type = "toggle", text = L["HideMax"], var = "HideMax", def = false, keepShown = true },
 	{ type = "toggle", text = L["HideExalted"], var = "HideExalted", def = false, keepShown = true },
-	{ type = "toggle", text = L["AlwaysShowParagon"], var = "AlwaysShowParagon", def = true, keepShown = true },
 	{ type = "space" },
 	{ type = "rightSideToggle" }
 }
