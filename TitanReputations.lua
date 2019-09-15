@@ -16,6 +16,7 @@ Color.ORANGE = "|cFFE77324"
 
 local SEX = UnitSex("player")
 
+local sessionStart = {}
 
 -- @return current, maximun, color, standingText
 local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, factionId)
@@ -26,6 +27,9 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 	local color = "|cFF00FF00"
 	local standingText = " (" .. ((SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"] or "?") .. ")"
 
+	sessionStart[factionId] = sessionStart[factionId] or barValue
+	local session = barValue - sessionStart[factionId]
+
 	if (C_Reputation.IsFactionParagon(factionId)) then
 		color = "|cFF00FFFF"
 
@@ -33,7 +37,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 
 		if hasRewardPending then standingText = standingText .. "*" end
 
-		return mod(currentValue, threshold), threshold, color, standingText, hasRewardPending
+		return mod(currentValue, threshold), threshold, color, standingText, hasRewardPending, session
 	end
 
 	local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionId)
@@ -65,7 +69,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 		end
 	end
 
-	return current, maximun, color, standingText
+	return current, maximun, color, standingText, nil, session
 end
 
 local function GetButtonText(self, id)
@@ -74,7 +78,7 @@ local function GetButtonText(self, id)
 	if not name then
 		return "", ""
 	end
-	local value, max, color, _, hasRewardPending = GetValueAndMaximum(standingID, barValue, bottomValue, topValue, factionId)
+	local value, max, color, _, hasRewardPending, balance = GetValueAndMaximum(standingID, barValue, bottomValue, topValue, factionId)
 
 	local text = "" .. color
 
@@ -104,6 +108,10 @@ local function GetButtonText(self, id)
 		end
 	end
 
+	if TitanGetVar(id, "ShowSessionBalance") and balance > 0 then
+		text = text .. " [" .. balance .. "]"
+	end
+
 	return name .. ":", text
 end
 
@@ -127,6 +135,16 @@ local function IsMaxed(factionId, standingId)
 	return standingId == 8
 end
 
+local function formatRep(nameColor, name, valueColor, value, max, standing, balance)
+	if (balance == 0) then
+		balance = ""
+	else
+		balance = " [" .. balance .. "]"
+	end
+
+	return nameColor .. name .. "\t" .. valueColor .. value .. "/" .. max .. standing .. balance .. "|r\n"
+end
+
 local function GetTooltipText(self, id)
 	local text = ""
 
@@ -146,10 +164,10 @@ local function GetTooltipText(self, id)
 
 		if name then
 			if isWatched then
-				local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
+				local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
 				local nameColor = (atWarWith and Color.RED) or ""
 
-				topText = nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n\n"
+				topText = formatRep(nameColor, name, color, value, max, standing, balance) .. "\n"
 			end
 
 			if isHeader then
@@ -162,9 +180,9 @@ local function GetTooltipText(self, id)
 
 				if showHeaders then
 					if hasRep then
-						local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
+						local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
 
-						headerText = Color.WHITE .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n"
+						headerText = formatRep(Color.WHITE, name, color, value, max, standing, balance)
 					else
 						headerText = Color.WHITE .. name .. "|r\n"
 					end
@@ -186,10 +204,10 @@ local function GetTooltipText(self, id)
 				end
 
 				if show then
-					local value, max, color, standing = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
+					local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
 					local nameColor = (atWarWith and Color.RED) or ""
 
-					childText = childText .. "-" .. nameColor .. name .. "\t" .. color .. value .. "/" .. max .. standing .. "|r\n"
+					childText = childText .. "-" .. formatRep(nameColor, name, color, value, max, standing, balance)
 				end
 			end
 		end
@@ -206,9 +224,22 @@ local function GetTooltipText(self, id)
 	return topText .. text
 end
 
+local function prepareSessioTable()
+	local numFactions = GetNumFactions()
+	for factionIndex = 1, numFactions do
+		local name, _, standingId, bottomValue, topValue, earnedValue, atWarWith, _, isHeader, _, hasRep, isWatched, _, factionId, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(factionIndex)
+
+		if name and factionId then
+			sessionStart[factionId] = earnedValue
+		end
+	end
+end
+
 local eventsTable = {
 	PLAYER_ENTERING_WORLD = function(self)
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+
+		prepareSessioTable()
 
 		TitanPanelButton_UpdateButton(self.registry.id)
 	end,
@@ -232,6 +263,7 @@ local menus = {
 	{ type = "toggle", text = L["HideMax"], var = "HideMax", def = false, keepShown = true },
 	{ type = "toggle", text = L["HideExalted"], var = "HideExalted", def = false, keepShown = true },
 	{ type = "toggle", text = L["AlwaysShowParagon"], var = "AlwaysShowParagon", def = true, keepShown = true },
+	{ type = "toggle", text = L["ShowSessionBalance"], var = "ShowSessionBalance", def = false, keepShown = true },
 	{ type = "space" },
 	{ type = "rightSideToggle" }
 }
