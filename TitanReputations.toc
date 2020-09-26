@@ -1,4 +1,4 @@
-## Interface: 80300
+## Interface: 90001
 ## Title: Titan Panel [|cffeda55fReputation|r]
 ## Notes: Titan Panel plugin that shows your Reputations.
 ## Author: Eliote
