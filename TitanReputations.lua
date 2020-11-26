@@ -170,7 +170,7 @@ local function GetTooltipText(self, id)
 				topText = formatRep(nameColor, name, color, value, max, standing, balance) .. "\n"
 			end
 
-			if isHeader then
+			if isHeader and not hasRep then
 				-- if the previous header has child
 				if (headerText and childText ~= "") then
 					text = text .. headerText .. childText
@@ -179,13 +179,7 @@ local function GetTooltipText(self, id)
 				end
 
 				if showHeaders then
-					if hasRep then
-						local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
-
-						headerText = formatRep(Color.WHITE, name, color, value, max, standing, balance)
-					else
-						headerText = Color.WHITE .. name .. "|r\n"
-					end
+					headerText = Color.WHITE .. name .. "|r\n"
 				end
 			else
 				local hideExalted = TitanGetVar(id, "HideExalted")
@@ -207,7 +201,13 @@ local function GetTooltipText(self, id)
 					local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
 					local nameColor = (atWarWith and Color.RED) or ""
 
-					childText = childText .. "-" .. formatRep(nameColor, name, color, value, max, standing, balance)
+					local prefix = "-"
+					if isHeader then -- this is for headers with reputation
+						nameColor = Color.WHITE
+						prefix = ""
+					end
+
+					childText = childText .. prefix .. formatRep(nameColor, name, color, value, max, standing, balance)
 				end
 			end
 		end
