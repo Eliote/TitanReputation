@@ -18,20 +18,43 @@ local SEX = UnitSex("player")
 
 local sessionStart = {}
 
+local defaultColors = {
+	[1] = "FFCC2222",
+	[2] = "FFFF0000",
+	[3] = "FFEE6622",
+	[4] = "FFFFFF00",
+	[5] = "FF00FF00",
+	[6] = "FF00FF88",
+	[7] = "FF00FFCC",
+	[8] = "FF00FFFF"
+}
+
+local function GetColors(id)
+	local colors = {}
+	for i = 1, 8 do
+		colors[i] = "|c" .. (TitanGetVar(id, "ColorStanding" .. i) or defaultColors[i])
+	end
+	return colors
+end
+
+local function GetFactionLabel(standingId)
+	return (SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"] or "?"
+end
+
 -- @return current, maximun, color, standingText
-local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, factionId)
+local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, factionId, colors)
 	if (standingId == nil) then return "0", "0", "|cFFFF0000", "??? - " .. (factionId .. "?") end
 
 	local current = barValue - bottomValue
 	local maximun = topValue - bottomValue
-	local color = "|cFF00FF00"
-	local standingText = " (" .. ((SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"] or "?") .. ")"
+	local color = colors[5]
+	local standingText = " (" .. GetFactionLabel(standingId) .. ")"
 
 	sessionStart[factionId] = sessionStart[factionId] or barValue
 	local session = barValue - sessionStart[factionId]
 
 	if (C_Reputation.IsFactionParagon(factionId)) then
-		color = "|cFF00FFFF"
+		color = colors[8]
 
 		local currentValue, threshold, rewardQuestID, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionId);
 
@@ -50,23 +73,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 			maximun, current = 1, 1
 		end
 	else
-		if standingId == 1 then
-			color = "|cFFCC2222"
-		elseif standingId == 2 then
-			color = "|cFFFF0000"
-		elseif standingId == 3 then
-			color = "|cFFEE6622"
-		elseif standingId == 4 then
-			color = "|cFFFFFF00"
-		elseif standingId == 5 then
-			color = "|cFF00FF00"
-		elseif standingId == 6 then
-			color = "|cFF00FF88"
-		elseif standingId == 7 then
-			color = "|cFF00FFCC"
-		elseif standingId == 8 then
-			color = "|cFF00FFFF"
-		end
+		color = colors[standingId] or color
 	end
 
 	return current, maximun, color, standingText, nil, session
@@ -78,7 +85,7 @@ local function GetButtonText(self, id)
 	if not name then
 		return "", ""
 	end
-	local value, max, color, _, hasRewardPending, balance = GetValueAndMaximum(standingID, barValue, bottomValue, topValue, factionId)
+	local value, max, color, _, hasRewardPending, balance = GetValueAndMaximum(standingID, barValue, bottomValue, topValue, factionId, GetColors(id))
 
 	local text = "" .. color
 
@@ -159,12 +166,14 @@ local function GetTooltipText(self, id)
 	local headerText
 	local childText = ""
 
+	local colors = GetColors(id)
+
 	for factionIndex = 1, numFactions do
 		local name, _, standingId, bottomValue, topValue, earnedValue, atWarWith, _, isHeader, _, hasRep, isWatched, _, factionId, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(factionIndex)
 
 		if name then
 			if isWatched then
-				local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
+				local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId, colors)
 				local nameColor = (atWarWith and Color.RED) or ""
 
 				topText = formatRep(nameColor, name, color, value, max, standing, balance) .. "\n"
@@ -198,7 +207,7 @@ local function GetTooltipText(self, id)
 				end
 
 				if show then
-					local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId)
+					local value, max, color, standing, _, balance = GetValueAndMaximum(standingId, earnedValue, bottomValue, topValue, factionId, colors)
 					local nameColor = (atWarWith and Color.RED) or ""
 
 					local prefix = "-"
@@ -255,7 +264,7 @@ local function OnClick(self, button)
 end
 
 local menus = {
-	{ type = "space" },
+	{ type = "rightSideToggle" },
 	{ type = "toggle", text = L["HideNeutral"], var = "HideNeutral", def = false, keepShown = true },
 	{ type = "toggle", text = L["ShowValue"], var = "ShowValue", def = true, keepShown = true },
 	{ type = "toggle", text = L["ShowPercent"], var = "ShowPercent", def = true, keepShown = true },
@@ -265,10 +274,20 @@ local menus = {
 	{ type = "toggle", text = L["AlwaysShowParagon"], var = "AlwaysShowParagon", def = true, keepShown = true },
 	{ type = "toggle", text = L["ShowSessionBalance"], var = "ShowSessionBalance", def = false, keepShown = true },
 	{ type = "space" },
-	{ type = "rightSideToggle" }
+	{ type = "title", text = L["ColorTitle"] },
 }
 
-L.Elib({
+for i = 1, 8 do
+	table.insert(menus, {
+		type = "color",
+		text = GetFactionLabel(i),
+		var = "ColorStanding" .. i,
+		def = defaultColors[i],
+		dialogText = string.format(L["ResetColorDialog"], GetFactionLabel(i))
+	})
+end
+
+LibStub("Elib-4.0").Register({
 	id = "TITAN_REPUTATION_XP",
 	name = L["Reputation"],
 	tooltip = L["Reputation"],
