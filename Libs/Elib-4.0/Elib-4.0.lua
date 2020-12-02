@@ -3,7 +3,7 @@
 	Author: Eliote
 --]]
 
-local MAJOR, MINOR = "Elib-4.0", 2
+local MAJOR, MINOR = "Elib-4.0", 3
 local Elib = LibStub:NewLibrary(MAJOR, MINOR)
 if not Elib then return end
 
@@ -38,20 +38,54 @@ local function setDefaultSavedVariables(sv, menus)
 	end
 end
 
-StaticPopupDialogs["ELIB_DEFAULT_RESET_COLOR_DIALOG"] = {
-	text = "%s",
-	button1 = "Yes",
-	button2 = "No",
-	OnAccept = function(_, data)
-		if not data then return end
-		TitanSetVar(data.id, data.var, data.def)
-		TitanPanelButton_UpdateButton(data.id)
-	end,
-	timeout = 0,
-	whileDead = true,
-	hideOnEscape = true,
-	preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-}
+local function initMenu(self, level, menuList, id)
+	for k, v in ipairs(menuList) do
+		local info = {}
+		info.text = v.text
+		info.arg1 = v.arg1
+		info.arg2 = v.arg2
+		info.notCheckable = true
+		info.func = v.func
+
+		if v.menuList then
+			info.hasArrow = true
+			info.menuList = v.menuList
+		end
+
+		if v.type == "toggle" then
+			info.notCheckable = false
+			info.func = v.func or function()
+				TitanToggleVar(id, v.var);
+				TitanPanelButton_UpdateButton(id)
+			end
+			info.checked = TitanGetVar(id, v.var)
+			info.keepShownOnClick = v.keepShown
+			EDDM.UIDropDownMenu_AddButton(info, level)
+		elseif v.type == "space" then
+			EDDM.UIDropDownMenu_AddSpace(level)
+		elseif v.type == "button" then
+			EDDM.UIDropDownMenu_AddButton(info, level)
+		elseif v.type == "title" then
+			info.isTitle = true
+			EDDM.UIDropDownMenu_AddButton(info, level)
+		elseif v.type == "color" then
+			local colorHex = TitanGetVar(id, v.var) or v.def or "FF000000"
+			info.r, info.g, info.b = CreateColorFromHexString(colorHex):GetRGB()
+			info.swatchFunc = v.swatchFunc or function()
+				local color = CreateColor(ColorPickerFrame:GetColorRGB())
+				TitanSetVar(id, v.var, color:GenerateHexColor())
+				TitanPanelButton_UpdateButton(id)
+			end
+			info.cancelFunc = v.cancelFunc or function(previousValues)
+				if previousValues then
+					TitanSetVar(id, v.var, CreateColor(previousValues.r, previousValues.g, previousValues.b):GenerateHexColor())
+				end
+			end
+			info.hasColorSwatch = true
+			EDDM.UIDropDownMenu_AddButton(info, level)
+		end
+	end
+end
 
 function Elib.Register(easyObject)
 	local function initializeMenu(self, level, menuList)
@@ -59,6 +93,10 @@ function Elib.Register(easyObject)
 
 		if easyObject.prepareMenu then
 			return easyObject.prepareMenu(EDDM, self, easyObject.id, level, menuList)
+		end
+
+		if level and level > 1 then
+			return initMenu(self, level, menuList, id)
 		end
 
 		EDDM.UIDropDownMenu_AddButton({
@@ -91,61 +129,7 @@ function Elib.Register(easyObject)
 		EDDM.UIDropDownMenu_AddSeparator()
 
 		if menus then
-			for k, v in ipairs(menus) do
-				if v.type == "toggle" then
-					local info = {}
-					info.text = v.text
-					info.func = v.func or function()
-						TitanToggleVar(id, v.var);
-						TitanPanelButton_UpdateButton(id)
-					end
-					info.checked = TitanGetVar(id, v.var)
-					info.keepShownOnClick = v.keepShown
-					EDDM.UIDropDownMenu_AddButton(info)
-				elseif v.type == "space" then
-					EDDM.UIDropDownMenu_AddSpace()
-				elseif v.type == "button" then
-					local info = {}
-					info.text = v.text
-					info.func = v.func
-					info.notCheckable = true
-					info.arg1 = v.arg1
-					info.arg2 = v.arg2
-					EDDM.UIDropDownMenu_AddButton(info)
-				elseif v.type == "title" then
-					local info = {}
-					info.text = v.text
-					info.notCheckable = true
-					info.isTitle = true
-					EDDM.UIDropDownMenu_AddButton(info)
-				elseif v.type == "color" then
-					local colorHex = TitanGetVar(id, v.var) or v.def or "FF000000"
-					local info = {}
-					info.text = v.text
-					info.r, info.g, info.b = CreateColorFromHexString(colorHex):GetRGB()
-					info.func = v.func or function()
-						local dialog = StaticPopup_Show("ELIB_DEFAULT_RESET_COLOR_DIALOG", v.dialogText or "Do you want to reset this color?")
-						if dialog then
-							dialog.data = { id = id, var = v.var, def = v.def }
-						end
-					end
-					info.swatchFunc = v.swatchFunc or function()
-						local color = CreateColor(ColorPickerFrame:GetColorRGB())
-						TitanSetVar(id, v.var, color:GenerateHexColor())
-						TitanPanelButton_UpdateButton(id)
-					end
-					info.cancelFunc = v.cancelFunc or function(previousValues)
-						if previousValues then
-							TitanSetVar(id, v.var, CreateColor(previousValues.r, previousValues.g, previousValues.b):GenerateHexColor())
-						end
-					end
-					info.arg1 = v.arg1
-					info.arg2 = v.arg2
-					info.notCheckable = true
-					info.hasColorSwatch = true
-					EDDM.UIDropDownMenu_AddButton(info)
-				end
-			end
+			initMenu(self, level, menus, id)
 			EDDM.UIDropDownMenu_AddButton({ text = "", notCheckable = true, notClickable = true, disabled = 1 })
 		end
 

@@ -263,6 +263,30 @@ local function OnClick(self, button)
 	end
 end
 
+local subColor = {}
+for i = 1, 8 do
+	table.insert(subColor, {
+		type = "button",
+		text = GetFactionLabel(i),
+		menuList = {
+			{
+				type = "color",
+				text = COLOR,
+				var = "ColorStanding" .. i,
+				def = defaultColors[i]
+			},
+			{
+				type = "button",
+				text = L["Reset"],
+				func = function()
+					TitanSetVar("TITAN_REPUTATION_XP", "ColorStanding" .. i, defaultColors[i])
+					TitanPanelButton_UpdateButton("TITAN_REPUTATION_XP")
+				end
+			}
+		}
+	})
+end
+
 local menus = {
 	{ type = "rightSideToggle" },
 	{ type = "toggle", text = L["HideNeutral"], var = "HideNeutral", def = false, keepShown = true },
@@ -274,18 +298,8 @@ local menus = {
 	{ type = "toggle", text = L["AlwaysShowParagon"], var = "AlwaysShowParagon", def = true, keepShown = true },
 	{ type = "toggle", text = L["ShowSessionBalance"], var = "ShowSessionBalance", def = false, keepShown = true },
 	{ type = "space" },
-	{ type = "title", text = L["ColorTitle"] },
+	{ type = "button", text = COLORS, menuList = subColor }
 }
-
-for i = 1, 8 do
-	table.insert(menus, {
-		type = "color",
-		text = GetFactionLabel(i),
-		var = "ColorStanding" .. i,
-		def = defaultColors[i],
-		dialogText = string.format(L["ResetColorDialog"], GetFactionLabel(i))
-	})
-end
 
 LibStub("Elib-4.0").Register({
 	id = "TITAN_REPUTATION_XP",

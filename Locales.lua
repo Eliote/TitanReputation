@@ -9,8 +9,7 @@ L["HideMax"] = "Hide maximun"
 L["HideExalted"] = "Hide exalted factions"
 L["AlwaysShowParagon"] = "Always show Paragon reputations"
 L["ShowSessionBalance"] = "Show session balance in button"
-L["ColorTitle"] = "Colors (click to reset)"
-L["ResetColorDialog"] = "Do you want to reset the color for '%s'?"
+L["Reset"] = "Reset"
 
 if GetLocale() == "ptBR" then
 	L["Reputation"] = "Reputação"
@@ -22,6 +21,5 @@ if GetLocale() == "ptBR" then
 	L["HideExalted"] = "Esconder facções exaltadas"
 	L["AlwaysShowParagon"] = "Sempre mostrar reputações Paragão"
 	L["ShowSessionBalance"] = "Exibir ganhos nesta sessão"
-	L["ColorTitle"] = "Cores (clique para resetar)"
-	L["ResetColorDialog"] = "Deseja resetar a cor para '%s'?"
+	L["ResetColor"] = "Resetar"
 end

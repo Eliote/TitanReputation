@@ -5,8 +5,8 @@
 ## Version: @project-version@
 ## Dependencies: Titan
 
-Libs\Elib-4.0\Elib-4.0.lua
 Libs\ElioteDropDownMenu-1.0\ElioteDropDownMenu-1.0.lua
+Libs\Elib-4.0\Elib-4.0.lua
 
 Locales.lua
 TitanReputations.lua
