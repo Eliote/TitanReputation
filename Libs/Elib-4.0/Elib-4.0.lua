@@ -3,7 +3,7 @@
 	Author: Eliote
 --]]
 
-local MAJOR, MINOR = "Elib-4.0", 3
+local MAJOR, MINOR = "Elib-4.0", 4
 local Elib = LibStub:NewLibrary(MAJOR, MINOR)
 if not Elib then return end
 
@@ -26,7 +26,7 @@ local function createTitanOption(id, text, var)
 end
 
 local function setDefaultSavedVariables(sv, menus)
-	sv.ShowIcon = sv.ShowIcon or 1
+	if sv.ShowIcon == nil then sv.ShowIcon = 1 end
 	sv.ShowLabelText = sv.ShowLabelText or false
 
 	if menus then
