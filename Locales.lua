@@ -10,6 +10,7 @@ L["HideExalted"] = "Hide exalted factions"
 L["AlwaysShowParagon"] = "Always show Paragon reputations"
 L["ShowSessionBalance"] = "Show session balance in button"
 L["Reset"] = "Reset"
+L["Paragon"] = "Paragon"
 
 if GetLocale() == "ptBR" then
 	L["Reputation"] = "Reputação"
@@ -22,4 +23,5 @@ if GetLocale() == "ptBR" then
 	L["AlwaysShowParagon"] = "Sempre mostrar reputações Paragão"
 	L["ShowSessionBalance"] = "Exibir ganhos nesta sessão"
 	L["ResetColor"] = "Resetar"
+	L["Paragon"] = "Paragão"
 end

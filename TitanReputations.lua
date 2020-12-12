@@ -26,18 +26,27 @@ local defaultColors = {
 	[5] = "FF00FF00",
 	[6] = "FF00FF88",
 	[7] = "FF00FFCC",
-	[8] = "FF00FFFF"
+	[8] = "FF00FFFF",
+	paragon = "FF6DB3FF",
 }
+
+local defaultColorsSortedKeys = {}
+for k, _ in pairs(defaultColors) do table.insert(defaultColorsSortedKeys, k) end
+table.sort(defaultColorsSortedKeys, function(a, b)
+	if type(a) == type(b) then return a < b end
+	return type(b) == "string"
+end)
 
 local function GetColors(id)
 	local colors = {}
-	for i = 1, 8 do
-		colors[i] = "|c" .. (TitanGetVar(id, "ColorStanding" .. i) or defaultColors[i])
+	for k, v in pairs(defaultColors) do
+		colors[k] = "|c" .. (TitanGetVar(id, "ColorStanding" .. k) or v)
 	end
 	return colors
 end
 
 local function GetFactionLabel(standingId)
+	if standingId == "paragon" then return "Paragon" end
 	return (SEX == 2 and _G["FACTION_STANDING_LABEL" .. standingId]) or _G["FACTION_STANDING_LABEL" .. standingId .. "_FEMALE"] or "?"
 end
 
@@ -54,11 +63,15 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 	local session = barValue - sessionStart[factionId]
 
 	if (C_Reputation.IsFactionParagon(factionId)) then
-		color = colors[8]
+		color = colors.paragon
 
-		local currentValue, threshold, rewardQuestID, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionId);
+		local currentValue, threshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionId);
 
-		if hasRewardPending then standingText = standingText .. "*" end
+		if hasRewardPending then
+			standingText = " (" .. GetFactionLabel("paragon") .. " |A:ParagonReputation_Bag:0:0|a" .. ")"
+		else
+			standingText = " (" .. GetFactionLabel("paragon") .. ")"
+		end
 
 		return mod(currentValue, threshold), threshold, color, standingText, hasRewardPending, session
 	end
@@ -264,22 +277,22 @@ local function OnClick(self, button)
 end
 
 local subColor = {}
-for i = 1, 8 do
+for _, k in ipairs(defaultColorsSortedKeys) do
 	table.insert(subColor, {
 		type = "button",
-		text = GetFactionLabel(i),
+		text = GetFactionLabel(k),
 		menuList = {
 			{
 				type = "color",
 				text = COLOR,
-				var = "ColorStanding" .. i,
-				def = defaultColors[i]
+				var = "ColorStanding" .. k,
+				def = defaultColors[k]
 			},
 			{
 				type = "button",
 				text = L["Reset"],
 				func = function()
-					TitanSetVar("TITAN_REPUTATION_XP", "ColorStanding" .. i, defaultColors[i])
+					TitanSetVar("TITAN_REPUTATION_XP", "ColorStanding" .. k, defaultColors[k])
 					TitanPanelButton_UpdateButton("TITAN_REPUTATION_XP")
 				end
 			}
