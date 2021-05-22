@@ -16,6 +16,8 @@ Color.ORANGE = "|cFFE77324"
 
 local SEX = UnitSex("player")
 
+local GetFriendshipReputation = GetFriendshipReputation or nop
+
 local sessionStart = {}
 
 local defaultColors = {

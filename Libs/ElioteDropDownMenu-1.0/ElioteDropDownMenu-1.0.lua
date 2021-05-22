@@ -1,4 +1,4 @@
-local libName, libVersion = "ElioteDropDownMenu-1.0", 5
+local libName, libVersion = "ElioteDropDownMenu-1.0", 6
 
 --- @class ElioteDropDownMenu
 local lib = LibStub:NewLibrary(libName, libVersion)
@@ -1705,7 +1705,7 @@ end
 function lib.UIDropDownMenu_StartCounting() end -- no op
 function lib.UIDropDownMenu_StopCounting() end -- no op
 
-if IS_CLASSIC then
+if IS_CLASSIC or not UIDropDownMenu_HandleGlobalMouseEvent then
 	-- Start the countdown on a frame
 	function lib.UIDropDownMenu_StartCounting(frame)
 		if (frame.parent) then
