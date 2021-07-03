@@ -1,9 +1,11 @@
-## Interface: 90005
+## Interface: 90100
 ## Title: Titan Panel [|cffeda55fReputation|r]
 ## Notes: Titan Panel plugin that shows your Reputations.
 ## Author: Eliote
 ## Version: @project-version@
 ## Dependencies: Titan
+
+## X-Curse-Project-ID: 95571
 
 Libs\ElioteDropDownMenu-1.0\ElioteDropDownMenu-1.0.lua
 Libs\Elib-4.0\Elib-4.0.lua
