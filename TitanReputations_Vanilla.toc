@@ -1,0 +1,12 @@
+## Interface: 11403
+## Title: Titan Panel [|cffeda55fReputation|r]
+## Notes: Titan Panel plugin that shows your Reputations.
+## Author: Eliote
+## Version: @project-version@
+## Dependencies: TitanClassic
+
+Libs\ElioteDropDownMenu-1.0\ElioteDropDownMenu-1.0.lua
+Libs\Elib-4.0\Elib-4.0.lua
+
+Locales.lua
+TitanReputations.lua
