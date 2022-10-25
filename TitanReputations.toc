@@ -1,6 +1,4 @@
-## Interface: 90100
-## Interface-Retail: 90100
-## Interface-BCC: 20501
+## Interface: 100000
 ## Title: Titan Panel [|cffeda55fReputation|r]
 ## Notes: Titan Panel plugin that shows your Reputations.
 ## Author: Eliote
