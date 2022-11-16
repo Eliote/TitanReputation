@@ -1,4 +1,4 @@
-## Interface: 100000
+## Interface: 100002
 ## Title: Titan Panel [|cffeda55fReputation|r]
 ## Notes: Titan Panel plugin that shows your Reputations.
 ## Author: Eliote
