@@ -4,6 +4,7 @@
 --]]
 
 local ADDON_NAME, L = ...;
+local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local VERSION = GetAddOnMetadata(ADDON_NAME, "Version")
 local PLUGIN_ID = "TITAN_REPUTATION_XP"
 local ICON = "Interface\\Icons\\INV_MISC_NOTE_02"
