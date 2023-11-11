@@ -1,4 +1,4 @@
-## Interface: 30401
+## Interface: 30403
 ## Title: Titan Panel [|cffeda55fReputation|r]
 ## Notes: Titan Panel plugin that shows your Reputations.
 ## Author: Eliote
