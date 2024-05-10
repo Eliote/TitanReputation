@@ -1,9 +1,10 @@
-## Interface: 30403
+## Interface: 40400
 ## Title: Titan Panel [|cffeda55fReputation|r]
 ## Notes: Titan Panel plugin that shows your Reputations.
 ## Author: Eliote
 ## Version: @project-version@
 ## Dependencies: TitanClassic
+## IconTexture: Interface\Icons\INV_MISC_NOTE_02
 
 ## X-Curse-Project-ID: 95571
 ## X-Wago-ID: Rn6VpLGd
