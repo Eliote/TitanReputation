@@ -39,6 +39,33 @@ local IsMajorFaction = C_Reputation.IsMajorFaction or nop
 local GetMajorFactionData = C_MajorFactions and C_MajorFactions.GetMajorFactionData and C_MajorFactions.GetMajorFactionData or nop
 local HasMaximumRenown = C_MajorFactions and C_MajorFactions.HasMaximumRenown and C_MajorFactions.HasMaximumRenown or nop
 local GetCurrentRenownLevel = C_MajorFactions and C_MajorFactions.GetCurrentRenownLevel or nop
+local GetNumFactions = GetNumFactions or C_Reputation.GetNumFactions
+
+local IsFactionInactive = IsFactionInactive or function(...)
+	return not C_Reputation.IsFactionActive(...)
+end
+
+local function unwrapFactionData(data)
+	if not data then return nil end
+	return data.name, data.description, data.reaction, data.currentReactionThreshold, data.nextReactionThreshold,
+	data.currentStanding, data.atWarWith, data.canToggleAtWar, data.isHeader, data.isCollapsed, data.isHeaderWithRep,
+	data.isWatched, data.isChild, data.factionID, data.hasBonusRepGain
+end
+
+--name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain
+local GetFactionInfo = GetFactionInfo or function(factionIndex)
+	local data = C_Reputation.GetFactionDataByIndex(factionIndex)
+	return unwrapFactionData(data)
+end
+local GetFactionInfoByID = GetFactionInfoByID or function(factionID)
+	local data = C_Reputation.GetFactionDataByID(factionID)
+	return unwrapFactionData(data)
+end
+
+local GetWatchedFactionInfo = GetWatchedFactionInfo or function()
+	local data = C_Reputation.GetWatchedFactionData()
+	return unwrapFactionData(data)
+end
 
 local sessionStart = {}
 local sessionStartMajorFaction = {}
