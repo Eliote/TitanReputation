@@ -62,9 +62,13 @@ local GetFactionInfoByID = GetFactionInfoByID or function(factionID)
 	return unwrapFactionData(data)
 end
 
-local GetWatchedFactionInfo = GetWatchedFactionInfo or function()
+local GetWatchedFactionID = function()
+	if (GetWatchedFactionInfo) then
+		local _, _, _, _, _, factionID = GetWatchedFactionInfo()
+		return factionID
+	end
 	local data = C_Reputation.GetWatchedFactionData()
-	return unwrapFactionData(data)
+	return data.factionID
 end
 
 local sessionStart = {}
@@ -202,9 +206,9 @@ local function GetButtonMainRepInfo(self)
 	if (factionId and factionId ~= 0 and TitanGetVar(PLUGIN_ID, "SmartReputation") == 1) then
 		name, _, standingId, bottomValue, topValue, barValue, atWarWith = GetFactionInfoByID(factionId)
 	else
-		name, standingId, bottomValue, topValue, barValue, factionId = GetWatchedFactionInfo()
+		factionId = GetWatchedFactionID()
 		if (factionId) then
-			atWarWith = select(7, GetFactionInfoByID(factionId))
+			name, _, standingId, bottomValue, topValue, barValue, atWarWith = GetFactionInfoByID(factionId)
 		end
 	end
 	return {
