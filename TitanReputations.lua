@@ -117,6 +117,17 @@ local function GetFactionLabel(standingId)
 	return GetText("FACTION_STANDING_LABEL" .. standingId, SEX)
 end
 
+local function MajorFactionTexture(majorFactionData)
+	local kit = majorFactionData.textureKit
+	if (not kit) then return nil end
+
+	if (majorFactionData.expansionID >= 10) then
+		-- yes, the new ones are in plural "MajorFaction[s]" ¯\_(ツ)_/¯
+		return ([[Interface\Icons\UI_MajorFactions_%s]]):format(kit)
+	end
+	return ([[Interface\Icons\UI_MajorFaction_%s]]):format(kit)
+end
+
 local function GetSessionStartTable(factionId)
 	if (not sessionStartMajorFaction[factionId]) then
 		local data = GetMajorFactionData(factionId)
@@ -163,7 +174,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 		local current = isCapped and data.renownLevelThreshold or data.renownReputationEarned or 0
 		local standingText = " (" .. (RENOWN_LEVEL_LABEL .. data.renownLevel) .. ")"
 		local session = GetBalanceForMajorFaction(factionId, current, data.renownLevel)
-		local texture = data.textureKit and ([[Interface\Icons\UI_MajorFaction_%s]]):format(data.textureKit)
+		local texture = MajorFactionTexture(data)
 		if (C_Reputation.IsFactionParagon(factionId)) then
 			return GetParagonValues(barValue, factionId, colors, texture)
 		end
