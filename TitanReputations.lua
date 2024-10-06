@@ -18,6 +18,9 @@ Color.ORANGE = "|cFFE77324"
 
 local SEX = UnitSex("player")
 
+-- Not available in Classic Era/SoD
+local IsFactionParagon = C_Reputation.IsFactionParagon and C_Reputation.IsFactionParagon or function(factionId) return false end
+
 local GetFriendshipReputation = GetFriendshipReputation
 if not GetFriendshipReputation and C_GossipInfo and C_GossipInfo.GetFriendshipReputation then
 	GetFriendshipReputation = function(factionId)
@@ -177,7 +180,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 		local standingText = " (" .. (RENOWN_LEVEL_LABEL .. data.renownLevel) .. ")"
 		local session = GetBalanceForMajorFaction(factionId, current, data.renownLevel)
 		local texture = MajorFactionTexture(data)
-		if (C_Reputation.IsFactionParagon(factionId)) then
+		if (IsFactionParagon(factionId)) then
 			return GetParagonValues(barValue, factionId, colors, texture)
 		end
 		return current, data.renownLevelThreshold, colors.renown, standingText, nil, session, texture
@@ -187,7 +190,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 		return "0", "0", "|cFFFF0000", "??? - " .. (factionId .. "?")
 	end
 
-	if (C_Reputation.IsFactionParagon(factionId)) then
+	if (IsFactionParagon(factionId)) then
 		return GetParagonValues(barValue, factionId, colors)
 	end
 
@@ -377,7 +380,7 @@ local function GetTooltipText(self, id)
 					show = false
 				end
 
-				if (alwaysShowParagon and C_Reputation.IsFactionParagon(factionId)) then
+				if (alwaysShowParagon and IsFactionParagon(factionId)) then
 					show = true
 				end
 
