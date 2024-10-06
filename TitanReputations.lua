@@ -18,8 +18,9 @@ Color.ORANGE = "|cFFE77324"
 
 local SEX = UnitSex("player")
 
+local IsFactionParagon = C_Reputation.IsFactionParagon
 -- Not available in Classic Era/SoD
-local IsFactionParagon = C_Reputation.IsFactionParagon and C_Reputation.IsFactionParagon or function(factionId) return false end
+IsFactionParagon = IsFactionParagon or nop
 
 local GetFriendshipReputation = GetFriendshipReputation
 if not GetFriendshipReputation and C_GossipInfo and C_GossipInfo.GetFriendshipReputation then
