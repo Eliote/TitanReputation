@@ -18,10 +18,6 @@ Color.ORANGE = "|cFFE77324"
 
 local SEX = UnitSex("player")
 
-local IsFactionParagon = C_Reputation.IsFactionParagon
--- Not available in Classic Era/SoD
-IsFactionParagon = IsFactionParagon or nop
-
 local GetFriendshipReputation = GetFriendshipReputation
 if not GetFriendshipReputation and C_GossipInfo and C_GossipInfo.GetFriendshipReputation then
 	GetFriendshipReputation = function(factionId)
@@ -40,6 +36,7 @@ end
 GetFriendshipReputation = GetFriendshipReputation or nop
 
 local IsMajorFaction = C_Reputation.IsMajorFaction or nop
+local IsFactionParagon = C_Reputation.IsFactionParagon or nop
 local GetMajorFactionData = C_MajorFactions and C_MajorFactions.GetMajorFactionData and C_MajorFactions.GetMajorFactionData or nop
 local HasMaximumRenown = C_MajorFactions and C_MajorFactions.HasMaximumRenown and C_MajorFactions.HasMaximumRenown or nop
 local GetCurrentRenownLevel = C_MajorFactions and C_MajorFactions.GetCurrentRenownLevel or nop
