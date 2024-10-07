@@ -36,6 +36,7 @@ end
 GetFriendshipReputation = GetFriendshipReputation or nop
 
 local IsMajorFaction = C_Reputation.IsMajorFaction or nop
+local IsFactionParagon = C_Reputation.IsFactionParagon or nop
 local GetMajorFactionData = C_MajorFactions and C_MajorFactions.GetMajorFactionData and C_MajorFactions.GetMajorFactionData or nop
 local HasMaximumRenown = C_MajorFactions and C_MajorFactions.HasMaximumRenown and C_MajorFactions.HasMaximumRenown or nop
 local GetCurrentRenownLevel = C_MajorFactions and C_MajorFactions.GetCurrentRenownLevel or nop
@@ -177,7 +178,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 		local standingText = " (" .. (RENOWN_LEVEL_LABEL .. data.renownLevel) .. ")"
 		local session = GetBalanceForMajorFaction(factionId, current, data.renownLevel)
 		local texture = MajorFactionTexture(data)
-		if (C_Reputation.IsFactionParagon(factionId)) then
+		if (IsFactionParagon(factionId)) then
 			return GetParagonValues(barValue, factionId, colors, texture)
 		end
 		return current, data.renownLevelThreshold, colors.renown, standingText, nil, session, texture
@@ -187,7 +188,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 		return "0", "0", "|cFFFF0000", "??? - " .. (factionId .. "?")
 	end
 
-	if (C_Reputation.IsFactionParagon(factionId)) then
+	if (IsFactionParagon(factionId)) then
 		return GetParagonValues(barValue, factionId, colors)
 	end
 
@@ -377,7 +378,7 @@ local function GetTooltipText(self, id)
 					show = false
 				end
 
-				if (alwaysShowParagon and C_Reputation.IsFactionParagon(factionId)) then
+				if (alwaysShowParagon and IsFactionParagon(factionId)) then
 					show = true
 				end
 
