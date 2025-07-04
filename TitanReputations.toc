@@ -1,6 +1,4 @@
-## Interface: 110105
-## Interface-Classic: 11507
-## Interface-Cata: 40402
+## Interface: 110107, 50500, 11507
 ## Title: Titan Panel [|cffeda55fReputation|r]
 ## Notes: Titan Panel plugin that shows your Reputations.
 ## Author: Eliote
