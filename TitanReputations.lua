@@ -183,7 +183,7 @@ local function GetValueAndMaximum(standingId, barValue, bottomValue, topValue, f
 		local data = GetMajorFactionData(factionId)
 		local isCapped = HasMaximumRenown(factionId)
 		local current = isCapped and data.renownLevelThreshold or data.renownReputationEarned or 0
-		local standingText = " (" .. (RENOWN_LEVEL_LABEL .. data.renownLevel) .. ")"
+		local standingText = " (" .. RENOWN_LEVEL_LABEL:format(data.renownLevel) .. ")"
 		local session = GetBalanceForMajorFaction(factionId, current, data.renownLevel)
 		local texture = MajorFactionTexture(data)
 		if (IsFactionParagon(factionId)) then
